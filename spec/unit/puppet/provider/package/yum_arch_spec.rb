@@ -20,7 +20,7 @@ describe provider_class do
   end
 
   before do
-    provider.stubs(:yum).returns 'yum'
+    provider_class.stubs(:command).with(:cmd).returns('/usr/bin/yum')
     provider.stubs(:rpm).returns 'rpm'
     provider.stubs(:get).with(:version).returns '1'
     provider.stubs(:get).with(:release).returns '1'
@@ -44,16 +44,19 @@ describe provider_class do
     let(:name) { "mypackage.#{arch}" }
     let(:resource) do
       Puppet::Type.type(:package).new(
-        :name     => name,
-        :ensure   => :installed,
-        :provider => 'yum_arch'
-        )
+        :name          => name,
+        :ensure        => :installed,
+        :provider      => 'yum_arch',
+        :allow_virtual => false,
+      )
     end
 
     it 'should be able to set version and detect arch' do
       version = '1.2'
       resource[:ensure] = version
-      provider.expects(:yum).with('-d', '0', '-e', '0', '-y', :install, "mypackage-1.2.#{arch}")
+      Facter.stubs(:value).with(:operatingsystemmajrelease).returns('6')
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :list, "mypackage.#{arch}"])
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :install, "mypackage-1.2.#{arch}"])
       provider.stubs(:query).returns :ensure => '1.2'
       provider.install
     end
