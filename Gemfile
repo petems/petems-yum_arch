@@ -8,6 +8,7 @@ group :development, :unit_tests do
   gem 'json',                    :require => false
   gem 'puppet-blacksmith',       :require => false
   gem 'rake', '> 10',            :require => false
+  gem 'metadata-json-lint',      :require => false
 end
 
 group :system_tests do
