@@ -1,5 +1,7 @@
 # petems-yum_arch
 
+[![Build Status](https://travis-ci.org/petems/petems-yum_arch.svg?branch=master)](https://travis-ci.org/petems/petems-yum_arch)
+
 ## Usage
 
 ```puppet
