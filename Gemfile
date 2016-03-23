@@ -7,7 +7,7 @@ group :development, :unit_tests do
   gem 'puppet_facts',            :require => false
   gem 'json',                    :require => false
   gem 'puppet-blacksmith',       :require => false
-  gem 'rake', '>= 10.1.1'        :require => false
+  gem 'rake', '>= 10.1.1',       :require => false
 end
 
 group :system_tests do
