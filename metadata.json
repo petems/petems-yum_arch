@@ -1,6 +1,6 @@
 {
   "name": "petems-yum_arch",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Petems",
   "summary": "A temporary workaround module for PUP-1364.",
   "license": "Apache-2.0",
