@@ -1,6 +1,7 @@
 require 'spec_helper_acceptance'
 
-describe 'nothing installed to ensure latest works', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
+describe 'nothing installed to ensure latest works', :unless => UNSUPPORTED_PLATFORMS.include?(fact('osfamily')),
+  :if => (Gem::Version.new(fact('puppetversion','-p')) < Gem::Version.new('4.5.0')) do
   before(:each) do
     # Make sure package already removed
     shell("yum remove -y firefox*", :acceptable_exit_codes => [0,1,2])

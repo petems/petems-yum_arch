@@ -1,6 +1,8 @@
 require 'spec_helper_acceptance'
 
-describe 'installed to ensure absent', :if => (fact('osfamily') == 'RedHat' && (fact('operatingsystemmajrelease') == '6')) do
+describe 'installed to ensure absent', :if => (fact('osfamily') == 'RedHat' && (fact('operatingsystemmajrelease') == '6')),
+  :if => (Gem::Version.new(fact('puppetversion','-p')) < Gem::Version.new('4.5.0')) do
+
   before(:each) do
     # Make sure package already removed
     shell("yum remove -y firefox*", :acceptable_exit_codes => [0,1,2])
