@@ -2,6 +2,12 @@
 
 [![Build Status](https://travis-ci.org/petems/petems-yum_arch.svg?branch=master)](https://travis-ci.org/petems/petems-yum_arch)
 
+## PUP-1364 now fixed in Puppet 4.5 onwards!
+
+[PUP-1364](https://tickets.puppetlabs.com/browse/PUP-1364) has now been fixed. It should now be resolved in Puppet 4.5 onwards.
+
+This module is for people using the older version of Puppet, a error has been added if you're using a Puppet version >= 4.5, as this module is a workaround.
+
 ## Usage
 
 ```puppet

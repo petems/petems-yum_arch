@@ -25,6 +25,7 @@ describe provider_class do
     provider.stubs(:get).with(:version).returns '1'
     provider.stubs(:get).with(:release).returns '1'
     provider.stubs(:get).with(:arch).returns 'i386'
+    stub_const("::Puppet::PUPPETVERSION", '4.4.0')
   end
 
   describe 'provider features' do
@@ -57,6 +58,52 @@ describe provider_class do
       Facter.stubs(:value).with(:operatingsystemmajrelease).returns('6')
       Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :list, "mypackage.#{arch}"])
       Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :install, "mypackage-1.2.#{arch}"])
+      provider.stubs(:query).returns :ensure => '1.2'
+      provider.install
+    end
+  end
+
+  context 'on Puppet > 4.5.0' do
+    let(:name) { "mypackage" }
+    let(:resource) do
+      Puppet::Type.type(:package).new(
+        :name          => name,
+        :ensure        => :installed,
+        :provider      => 'yum_arch',
+        :allow_virtual => false,
+      )
+    end
+
+    it 'should raise error with 4.5.0 message' do
+      version = '1.2'
+      resource[:ensure] = version
+      Facter.stubs(:value).with(:operatingsystemmajrelease).returns('6')
+      stub_const("::Puppet::PUPPETVERSION", '4.5.0')
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :list, "mypackage"])
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :install, "mypackage-1.2"])
+      provider.stubs(:query).returns :ensure => '1.2'
+      expect { provider.install }.to raise_error(Puppet::Error, /Good news! The Yum Arch issue \(PUP-1364\) is resolved in Puppet >= 4.5.0 \(you are on 4.5.0\)/)
+    end
+  end
+
+  context 'on Puppet < 3.8.3' do
+    let(:name) { "mypackage" }
+    let(:resource) do
+      Puppet::Type.type(:package).new(
+        :name          => name,
+        :ensure        => :installed,
+        :provider      => 'yum_arch',
+        :allow_virtual => false,
+      )
+    end
+
+    it 'should not show warning' do
+      version = '1.2'
+      resource[:ensure] = version
+      Facter.stubs(:value).with(:operatingsystemmajrelease).returns('6')
+      stub_const("::Puppet::PUPPETVERSION", '3.8.3')
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :list, "mypackage"])
+      Puppet::Util::Execution.expects(:execute).with(['/usr/bin/yum', '-d', '0', '-e', '0', '-y', :install, "mypackage-1.2"])
       provider.stubs(:query).returns :ensure => '1.2'
       provider.install
     end
