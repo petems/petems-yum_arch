@@ -11,12 +11,12 @@ describe 'yum_arch example from PUP-1364', :if => (fact('osfamily') == 'RedHat' 
   it 'should run successfully' do
     pp = <<-EOS
     package{ 'firefox.x86_64':
-      ensure   => '38.0.1-1.el6.centos',
+      ensure   => '45.2.0-1.el6.centos',
       provider => yum_arch,
     }
 
     package{ 'firefox.i686':
-      ensure   => '38.0.1-1.el6.centos',
+      ensure   => '45.2.0-1.el6.centos',
       provider => yum_arch,
     }
     EOS
