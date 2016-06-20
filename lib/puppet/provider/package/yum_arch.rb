@@ -5,7 +5,7 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
 
   commands :cmd => "yum", :rpm => "rpm"
 
-  YUM_ARCH_LIST = [
+  PUP1364_YUM_ARCH_LIST = [
     'i386',
     'i686',
     'ppc',
@@ -27,7 +27,7 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
     'sh4',
   ]
 
-  ARCH_REGEX = Regexp.new(YUM_ARCH_LIST.join('|\.'))
+  PUP1364_ARCH_REGEX = Regexp.new(PUP1364_YUM_ARCH_LIST.join('|\.'))
 
   if command('rpm')
     confine :true => begin
@@ -145,6 +145,7 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
   end
 
   def install
+    check_puppet_version
     wanted = @resource[:name]
     error_level = self.class.error_level
     # If not allowing virtual packages, do a query to ensure a real package exists
@@ -163,9 +164,9 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
     else
       # Add the package version
       wanted += "-#{should}"
-      if wanted.scan(ARCH_REGEX)
+      if wanted.scan(PUP1364_ARCH_REGEX)
         self.debug "Detected Arch argument in package! - Moving arch to end of version string"
-        wanted.gsub!(/(.+)(#{ARCH_REGEX})(.+)/,'\1\3\2')
+        wanted.gsub!(/(.+)(#{PUP1364_ARCH_REGEX})(.+)/,'\1\3\2')
       end
       is = self.query
       if is && yum_compareEVR(yum_parse_evr(should), yum_parse_evr(is[:ensure])) < 0
@@ -198,6 +199,7 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
 
   # What's the latest package version available?
   def latest
+    check_puppet_version
     upd = self.class.latest_package_version(@resource[:name], enablerepo, disablerepo, disableexcludes)
     unless upd.nil?
       # FIXME: there could be more than one update for a package
@@ -213,11 +215,21 @@ Puppet::Type.type(:package).provide :yum_arch, :parent => :rpm, :source => :rpm 
 
   def update
     # Install in yum can be used for update, too
+    check_puppet_version
     self.install
   end
 
   def purge
+    check_puppet_version
     execute([command(:cmd), "-y", :erase, @resource[:name]])
+  end
+
+  def check_puppet_version
+    unless Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.5.0') == -1
+      error_string = "Good news! The Yum Arch issue (PUP-1364) is resolved in Puppet >= 4.5.0 (you are on #{Puppet::PUPPETVERSION}).
+      To resolve this error, remove `provider => yum_arch` from your packages. The regular provider => yum will now accept arch strings"
+      raise Puppet::Error, error_string
+    end
   end
 
   # parse a yum "version" specification
